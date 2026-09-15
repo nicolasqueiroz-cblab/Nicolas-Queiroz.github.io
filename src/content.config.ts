@@ -11,6 +11,8 @@ const posts = defineCollection({
     sourceName: z.string().optional(),
     image: z.string().optional(),
     tags: z.array(z.string()).default([]),
+    // Texto para divulgar o post no LinkedIn (link e hashtags são anexados automaticamente).
+    linkedin: z.string().optional(),
     lang: z.enum(['pt', 'en']),
   }),
 });

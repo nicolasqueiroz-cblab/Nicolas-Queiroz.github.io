@@ -14,7 +14,8 @@ export default defineConfig({
       prefixDefaultLocale: true,
     },
   },
-  integrations: [sitemap()],
+  // /linkedin/ é o kit de divulgação do dono do site, não entra no sitemap.
+  integrations: [sitemap({ filter: (page) => !page.includes('/linkedin') })],
   vite: {
     plugins: [tailwindcss()],
   },

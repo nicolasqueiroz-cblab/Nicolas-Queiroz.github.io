@@ -159,22 +159,26 @@ Tarefa: escreva um post em {idioma} de 300-450 palavras sobre esta notícia. Req
 6. Retorne APENAS o markdown do corpo do post.
 
 Também gere no final, em uma linha JSON, os seguintes campos (sem markdown, sem cerca):
-{{"titulo_post": "...", "descricao_curta": "..."}}
+{{"titulo_post": "...", "descricao_curta": "...", "texto_linkedin": "..."}}
 
 Onde:
 - titulo_post: um título original em {idioma} (não copie o original), 8-12 palavras.
 - descricao_curta: resumo em 1 frase, até 160 caracteres.
+- texto_linkedin: texto em {idioma} para divulgar o post no LinkedIn, 70-130 palavras, em primeira
+  pessoa. Primeira frase forte (é o que aparece antes do "ver mais"), parágrafos curtos separados por
+  \\n\\n, termina com uma pergunta honesta pra quem lê. Sem emoji, sem hashtags, sem link (são
+  adicionados depois), sem travessão.
 
 Estrutura da resposta:
 CORPO_DO_POST
 
 ---METADATA---
-{{"titulo_post": "...", "descricao_curta": "..."}}
+{{"titulo_post": "...", "descricao_curta": "...", "texto_linkedin": "..."}}
 """
 
 
-def parse_gemini_output(text: str) -> tuple[str, str, str]:
-    """Extrai (corpo_markdown, titulo, descricao) da resposta do Gemini."""
+def parse_gemini_output(text: str) -> tuple[str, str, str, str]:
+    """Extrai (corpo_markdown, titulo, descricao, texto_linkedin) da resposta do Gemini."""
     if "---METADATA---" in text:
         body, meta_raw = text.split("---METADATA---", 1)
     else:
@@ -194,17 +198,20 @@ def parse_gemini_output(text: str) -> tuple[str, str, str]:
     body = body.strip()
 
     # Remove eventuais cercas de código ao redor do JSON
-    meta_raw = meta_raw.strip().strip("`").replace("json", "", 1).strip()
+    # (só o marcador "json" do início: o texto do LinkedIn pode conter a palavra)
+    meta_raw = re.sub(r"^json\s*", "", meta_raw.strip().strip("`")).strip()
 
     try:
         meta = json.loads(meta_raw)
         titulo = meta.get("titulo_post", "").strip()
         descricao = meta.get("descricao_curta", "").strip()
+        linkedin = meta.get("texto_linkedin", "").strip()
     except json.JSONDecodeError:
         titulo = ""
         descricao = ""
+        linkedin = ""
 
-    return body, titulo, descricao
+    return body, titulo, descricao, linkedin
 
 
 def guess_tags(article: dict) -> list[str]:
@@ -241,6 +248,7 @@ def write_draft(
     source_url: str,
     source_name: str,
     tags: list[str],
+    linkedin: str = "",
 ) -> Path:
     """Escreve o arquivo markdown do post na pasta drafts/{lang}/."""
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -266,8 +274,12 @@ def write_draft(
         f'lang: "{lang}"\n'
         f"source: {source_url}\n"
         f'sourceName: "{safe_source_name}"\n'
-        f"---\n\n"
     )
+    if linkedin:
+        # Bloco literal do YAML: preserva as quebras de parágrafo sem escapar nada.
+        indented = "\n".join(f"  {line}" if line else "" for line in linkedin.splitlines())
+        frontmatter += f"linkedin: |\n{indented}\n"
+    frontmatter += "---\n\n"
 
     dest.write_text(frontmatter + body + "\n", encoding="utf-8")
     return dest
@@ -314,7 +326,7 @@ def main() -> int:
             print(f"❌ Falha no Gemini ({lang}): {e}", file=sys.stderr)
             return 1
 
-        body, title, description = parse_gemini_output(raw)
+        body, title, description, linkedin = parse_gemini_output(raw)
 
         if not title:
             title = article.get("title", "Sem título")
@@ -329,6 +341,7 @@ def main() -> int:
             source_url=source_url,
             source_name=source_name,
             tags=tags,
+            linkedin=linkedin,
         )
         print(f"   → salvo em {dest.relative_to(REPO_ROOT)}", flush=True)
 

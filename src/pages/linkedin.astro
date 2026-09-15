@@ -1,0 +1,149 @@
+---
+// Kit de divulgação no LinkedIn (uso do dono do site): capa em PNG e texto
+// pronto de cada post. Fora do menu, do sitemap e dos buscadores.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostCover from '../components/PostCover.astro';
+import { coverName, formatDate, getPosts, linkedinText, postHref, socialImage, type Post } from '../lib/posts';
+
+const site = Astro.site ?? Astro.url;
+const posts = [...(await getPosts('pt')), ...(await getPosts('en'))].sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+// Agrupa PT e EN do mesmo post pela capa compartilhada.
+const groups = new Map<string, Post[]>();
+for (const post of posts) {
+  const key = post.data.image ?? post.id;
+  groups.set(key, [...(groups.get(key) ?? []), post]);
+}
+for (const group of groups.values()) {
+  group.sort((a, b) => (a.data.lang === b.data.lang ? 0 : a.data.lang === 'pt' ? -1 : 1));
+}
+---
+
+<BaseLayout lang="pt" title="Kit LinkedIn" noindex>
+  <header class="mb-14 max-w-2xl">
+    <h1 class="display text-[clamp(2.2rem,6vw,3.5rem)] text-[var(--color-ink)]">Kit LinkedIn</h1>
+    <p class="mt-4 text-lg leading-relaxed text-[var(--color-ink-soft)]">
+      Texto e capa de cada post. <strong class="text-[var(--color-ink)]">Abrir no LinkedIn</strong> já preenche o texto
+      (e copia para a área de transferência, caso o LinkedIn ignore o preenchimento). O link no fim do texto gera o card
+      com a capa; se preferir postar como imagem, baixe o PNG e anexe.
+    </p>
+    <p class="mt-3 text-sm text-[var(--color-muted)]">
+      Card sem imagem ou desatualizado? Cole a URL do post no
+      <a href="https://www.linkedin.com/post-inspector/" target="_blank" rel="noopener" class="font-medium text-[var(--color-accent)] hover:underline">Post Inspector</a>
+      para o LinkedIn reler a página.
+    </p>
+  </header>
+
+  <div class="space-y-20">
+    {[...groups.values()].map((group) => {
+      const lead = group[0];
+      const png = socialImage(lead);
+      const name = coverName(lead);
+      return (
+        <section class="border-t border-[var(--color-border)] pt-10">
+          <p class="text-sm text-[var(--color-muted)]">{formatDate(lead.data.pubDate, 'pt')}</p>
+          <div class="mt-4 grid gap-8 lg:grid-cols-[20rem_minmax(0,1fr)]">
+            <div class="self-start">
+              {name && png ? (
+                <>
+                  <img src={png} alt="" width="1200" height="630" loading="lazy" class="w-full rounded-md border border-[var(--color-border)]" />
+                  <a href={png} download={`${name}.png`} class="btn btn-ghost mt-3 w-full justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
+                      <path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"></path>
+                    </svg>
+                    Baixar capa (PNG)
+                  </a>
+                </>
+              ) : (
+                <>
+                  <PostCover post={lead} />
+                  <p class="mt-3 text-sm text-[var(--color-muted)]">Sem capa SVG: o post não terá imagem no card.</p>
+                </>
+              )}
+            </div>
+
+            <div class="grid gap-10">
+              {group.map((post) => (
+                <article data-li-post>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="chip">{post.data.lang.toUpperCase()}</span>
+                    {!post.data.linkedin && <span class="chip text-[var(--color-muted)]">texto automático</span>}
+                  </div>
+                  <h2 class="heading mt-3 text-lg leading-snug text-[var(--color-ink)]">
+                    <a href={postHref(post)} class="hover:text-[var(--color-accent)]">{post.data.title}</a>
+                  </h2>
+                  <textarea
+                    rows="10"
+                    aria-label={`Texto do LinkedIn: ${post.data.title}`}
+                    class="mt-4 w-full resize-y rounded-md border border-[var(--color-border)] bg-[var(--color-card)] p-3 text-sm leading-relaxed text-[var(--color-ink)] outline-none focus:border-[var(--color-accent)]"
+                    data-li-text
+                  >{linkedinText(post, site)}</textarea>
+                  <div class="mt-3 flex flex-wrap items-center gap-2">
+                    <button type="button" class="btn btn-primary gap-2" data-li-open>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4" aria-hidden="true">
+                        <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0Z"></path>
+                      </svg>
+                      Abrir no LinkedIn
+                    </button>
+                    <button type="button" class="btn btn-ghost" data-li-copy>Copiar texto</button>
+                    <span class="ml-auto text-xs text-[var(--color-muted)]" data-li-count aria-live="polite"></span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    })}
+  </div>
+
+  <script data-astro-rerun is:inline>
+    function initLinkedinKit() {
+      // Limite de caracteres de um post no LinkedIn.
+      var LIMIT = 3000;
+
+      function copy(text, btn) {
+        return navigator.clipboard.writeText(text).then(function () {
+          if (!btn) return;
+          var original = btn.dataset.originalLabel || btn.textContent;
+          btn.dataset.originalLabel = original;
+          btn.textContent = 'Texto copiado';
+          clearTimeout(btn._copyTimer);
+          btn._copyTimer = setTimeout(function () {
+            btn.textContent = original;
+          }, 2000);
+        });
+      }
+
+      document.querySelectorAll('[data-li-post]').forEach(function (card) {
+        var area = card.querySelector('[data-li-text]');
+        var count = card.querySelector('[data-li-count]');
+
+        function update() {
+          var over = area.value.length > LIMIT;
+          count.textContent = area.value.length + ' / ' + LIMIT;
+          count.style.color = over ? 'var(--color-tile-red)' : '';
+        }
+
+        area.oninput = update;
+        update();
+
+        card.querySelector('[data-li-copy]').onclick = function () {
+          copy(area.value, this);
+        };
+        card.querySelector('[data-li-open]').onclick = function () {
+          copy(area.value).catch(function () {});
+          window.open(
+            'https://www.linkedin.com/feed/?shareActive=true&text=' + encodeURIComponent(area.value),
+            '_blank',
+            'noopener',
+          );
+        };
+      });
+    }
+
+    initLinkedinKit();
+  </script>
+</BaseLayout>

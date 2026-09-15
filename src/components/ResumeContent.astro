@@ -1,5 +1,6 @@
 ---
-// Página inicial: currículo completo + últimos posts.
+// Currículo. `variant="home"` (página inicial) inclui o puzzle e os últimos
+// posts; `variant="resume"` (/pt/sobre, /en/about) mostra só o currículo.
 import ArticleCard from './ArticleCard.astro';
 import CopyButton from './CopyButton.astro';
 import KnowledgeGraph from './KnowledgeGraph.astro';
@@ -9,9 +10,11 @@ import { getPosts, type Lang } from '../lib/posts';
 
 interface Props {
   lang: Lang;
+  variant?: 'home' | 'resume';
 }
 
-const { lang } = Astro.props;
+const { lang, variant = 'home' } = Astro.props;
+const isHome = variant === 'home';
 const city = profile.location.split(',')[0];
 
 const t = {
@@ -101,13 +104,13 @@ const allTexts = [
 ];
 const matchCount = (skill: string) => allTexts.filter((text) => skillsIn(text).includes(skill)).length;
 
-const posts = (await getPosts(lang)).slice(0, 3);
+const posts = isHome ? (await getPosts(lang)).slice(0, 3) : [];
 const [firstName, ...restName] = profile.name.split(' ');
 const linkedinHandle = profile.linkedin.replace(/^https:\/\/(www\.)?/, '').replace(/\/$/, '');
 const githubHandle = profile.github.replace('https://', '');
 ---
 
-<section class="mb-24 grid items-center gap-12 md:grid-cols-[minmax(0,1fr)_18rem] md:gap-14">
+<section class:list={['mb-24 grid items-center gap-12', isHome && 'md:grid-cols-[minmax(0,1fr)_18rem] md:gap-14']}>
   <div>
     <h1 class="display text-[clamp(2.4rem,7.2vw,4.25rem)] text-[var(--color-ink)]">
       <span class="block">{firstName}</span>
@@ -121,7 +124,7 @@ const githubHandle = profile.github.replace('https://', '');
       <a href={profile.github} target="_blank" rel="noopener" class="btn btn-ghost">GitHub</a>
     </div>
   </div>
-  <TileWall lang={lang} />
+  {isHome && <TileWall lang={lang} />}
 </section>
 
 <div data-skill-explorer>

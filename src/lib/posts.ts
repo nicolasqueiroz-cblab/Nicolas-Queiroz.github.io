@@ -41,6 +41,35 @@ export function postSeed(post: Post): string {
   return post.data.image ?? post.data.source ?? post.id;
 }
 
+// Nome base da capa SVG (sem pasta e extensão), ou null se o post não tem capa SVG.
+export function coverName(post: Post): string | null {
+  const match = post.data.image?.match(/^\/posts-images\/([\w-]+)\.svg$/);
+  return match ? match[1] : null;
+}
+
+// Imagem para og:image. LinkedIn e afins não aceitam SVG, então capas SVG
+// apontam para o PNG gerado em src/pages/posts-images/[name].png.ts.
+export function socialImage(post: Post): string | undefined {
+  const name = coverName(post);
+  if (name) return `/posts-images/${name}.png`;
+  return post.data.image;
+}
+
+// Texto pronto para colar no LinkedIn: o campo `linkedin` do post (ou um texto
+// montado a partir de título e descrição), seguido do link e das hashtags.
+export function linkedinText(post: Post, site: URL | string): string {
+  const { title, description, linkedin, tags, lang } = post.data;
+  const url = new URL(postHref(post), site).href;
+  const intro = lang === 'pt' ? 'Escrevi sobre isso no blog:' : 'I wrote about it on my blog:';
+  const body = linkedin?.trim() || `${title}\n\n${description}\n\n${intro}`;
+  const hashtags = tags
+    .map((tag) => tag.replace(/[^\p{L}\p{N}]/gu, ''))
+    .filter(Boolean)
+    .map((tag) => `#${tag}`)
+    .join(' ');
+  return [body, url, hashtags].filter(Boolean).join('\n\n');
+}
+
 // Posts do mesmo idioma ordenados por tags em comum (depois por data).
 export function relatedPosts(post: Post, posts: Post[], limit = 2): Post[] {
   const tags = new Set(post.data.tags);

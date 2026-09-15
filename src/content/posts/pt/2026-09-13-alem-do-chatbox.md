@@ -5,6 +5,14 @@ pubDate: 2026-09-13
 tags: ["AI", "MCP", "APIs"]
 lang: "pt"
 image: "/posts-images/2026-09-13-alem-do-chatbox.svg"
+linkedin: |
+  Se um agente de IA vai tomar uma ação real no seu sistema, uma caixa de chat genérica é quase sempre a pior interface possível.
+
+  Li sobre o framework "Beyond the Chatbox", que defende raciocínio visível, checkpoints de aprovação humana e telas específicas por tarefa. Pra mim isso não é manifesto de design, é onde eu cheguei por necessidade prática no meu agente MCP pessoal: saber em qual módulo ele está olhando, rastrear de onde veio cada apontamento de revisão e aprovar antes de qualquer coisa virar código.
+
+  Chat genérico é barato de implementar. Tela de aprovação decente dá trabalho de verdade.
+
+  Se 40% dos apps corporativos tiverem agentes até o fim de 2026, quantos vão ter uma interface pensada pra mostrar o que estão fazendo?
 ---
 
 Uma agência de design lançou um framework chamado "Beyond the Chatbox" defendendo algo que, pra mim, devia ser óbvio há tempo: se um agente de IA vai tomar uma ação real no seu sistema, uma caixinha de texto genérica é quase sempre a pior interface possível pra isso. A proposta é mostrar o raciocínio do agente de forma visível, com checkpoints de aprovação humana e telas específicas (formulário aqui, tabela ali) em vez de devolver tudo como resposta corrida de chat. A previsão citada é que até o fim de 2026 cerca de 40% dos aplicativos corporativos vão ter agentes de IA pra tarefas específicas, contra menos de 5% em 2025.

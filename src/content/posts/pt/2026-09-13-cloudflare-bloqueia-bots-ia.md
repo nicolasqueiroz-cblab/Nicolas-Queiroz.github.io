@@ -5,6 +5,14 @@ pubDate: 2026-09-13
 tags: ["Cloud", "AI", "Backend"]
 lang: "pt"
 image: "/posts-images/2026-09-13-cloudflare-bloqueia-bots-ia.svg"
+linkedin: |
+  A partir de 15 de setembro de 2026, todo domínio novo na Cloudflare bloqueia por padrão crawlers de IA de treinamento em páginas com anúncio, e continua liberando bots de busca.
+
+  Acho sintomático que "seu conteúdo está treinando modelo sem permissão" tenha sido resolvido como configuração de CDN, e não como contrato. Por outro lado, faz sentido como arquitetura: construindo meu módulo de logs no GCP aprendi que controle de acesso na camada de infraestrutura é mais fácil de auditar e mais difícil de esquecer num endpoint novo.
+
+  E sim, tem uma ironia: os posts do meu blog são rascunhados com ajuda de um agente de IA que eu mesmo fiz. A diferença toda é quem escolhe.
+
+  Quantos sites vão nascer com esse bloqueio ligado sem ninguém saber que ele existe?
 ---
 
 Achei sintomático que a solução pra "seu conteúdo está sendo usado sem permissão pra treinar modelo" tenha virado, na prática, uma configuração de infraestrutura em vez de uma questão contratual. A partir de 15 de setembro de 2026, todo domínio novo criado na Cloudflare vai bloquear automaticamente crawlers de "Agente" e "Treinamento" de IA em páginas com anúncio, enquanto continua liberando bots de busca. Dá pro dono do site um controle bem mais granular sobre quem pode raspar o conteúdo, mas o fato de isso precisar existir como default de CDN diz muito sobre como esse assunto nunca foi resolvido em nenhum outro nível.

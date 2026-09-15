@@ -5,6 +5,14 @@ pubDate: 2026-09-13
 tags: ["AI", "Backend", "Cloud"]
 lang: "en"
 image: "/posts-images/2026-09-13-agentes-codificacao-orcamento.svg"
+linkedin: |
+  Nearly a third of the companies McKinsey surveyed skipped buying some piece of software because AI coding agents let them build it themselves.
+
+  That doesn't surprise me. As the only developer owning projects end to end at a chain with 90+ locations, I've picked "build" before: a loyalty program service in Odoo that other platforms consume, and a pluggable GCP logging module that saved us from paying for a whole observability tool.
+
+  Agents don't change the decision. They change what it costs to get there. Work that used to take a team weeks can now be a few days for one dev with the right agent.
+
+  What I'd love to know: how many of those 30% were cutting a subscription on price, and how many realized they could finally build what the vendor never quite got right?
 ---
 
 This doesn't surprise me at all, and I think that's exactly why it's worth sitting with for a second. McKinsey surveyed a bunch of organizations and found that nearly a third of them decided not to buy at least one software product or feature because they could build the same thing internally using AI coding agents.

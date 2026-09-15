@@ -49,10 +49,16 @@ tags: string[]          # opcional, default []
 source: string (URL)    # opcional
 sourceName: string      # opcional
 image: string           # esperado: "/posts-images/AAAA-MM-DD-slug-pt.svg" (mesmo arquivo no PT e no EN)
+linkedin: string        # opcional, bloco `|`: texto de divulgação no LinkedIn (ver seção própria)
 ```
 
-Página inicial (`/pt/`, `/en/`) é o currículo: `src/components/ResumeContent.astro`.
-`/pt/sobre` e `/en/about` só redirecionam para ela.
+Página inicial (`/pt/`, `/en/`): `src/components/ResumeContent.astro` com o
+puzzle (`TileWall`) e os últimos posts. `/pt/sobre` e `/en/about` usam o mesmo
+componente com `variant="resume"`: só o currículo.
+Kit LinkedIn (`/linkedin/`, fora do menu, do sitemap e com noindex):
+`src/pages/linkedin.astro`, capa PNG + texto pronto de cada post.
+Capas em PNG para og:image: `src/pages/posts-images/[name].png.ts` converte
+cada SVG no build (via `sharp`, que já vem com o Astro).
 Rotas dinâmicas dos posts: `src/pages/{pt,en}/blog/[...slug].astro`, que
 delegam para `src/components/PostPage.astro`. Listagens em
 `src/pages/{pt,en}/blog/index.astro`, via `src/components/BlogIndex.astro`.
@@ -94,6 +100,19 @@ de code review e base de conhecimento em grafo no Obsidian. Interesses
 fortes: agentes de IA, MCP, arquitetura modular desacoplada, automação,
 código configurável/documentado/testado. Não inventar clientes, tecnologias
 que ele não usa, ou opiniões fora deste contexto.
+
+## Como escrever o texto do LinkedIn
+
+Campo `linkedin` do frontmatter, em bloco literal (`linkedin: |`). O site anexa
+sozinho o link do post e as hashtags (das `tags`), então o texto não leva
+nenhum dos dois. Sem o campo, o kit monta um texto genérico a partir de título e
+descrição (marcado como "texto automático").
+
+- 70–130 palavras, parágrafos curtos separados por linha em branco
+- Primeira frase forte e autossuficiente: é o que aparece antes do "ver mais"
+- Mesmas regras de voz dos posts: primeira pessoa, sem clichê, sem emoji, sem travessão, conexão real com o contexto profissional
+- Terminar com uma pergunta honesta pra quem lê
+- EN é reescrita nativa, não tradução
 
 ## Como criar a capa do post
 
